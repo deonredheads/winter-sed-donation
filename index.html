@@ -477,7 +477,7 @@ async function checkAvailability(childIds){
 }
 
 /* ── MICROSOFT SIGN-IN ── */
-async function msSignIn(){
+window.msSignIn = async function(){(){
   if(IS_DEMO) return;
   if(!msalApp){ document.getElementById('ms-status').textContent='Loading… please try again in a moment.'; return; }
   document.getElementById('ms-status').textContent='Opening Microsoft sign-in…';
