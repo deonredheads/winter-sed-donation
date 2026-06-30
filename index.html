@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Winter SED – Donation Box Sponsorship</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-lt:#E1F5EE;--green-dk:#0F6E56;
+  --blue:#1A56A0;--blue-lt:#EAF2FB;--blue-dk:#0F3870;
+  --amber:#854F0B;--amber-lt:#FFF8EC;
+  --red:#A32D2D;--red-lt:#FCEBEB;
+  --text:#1a1a1a;--muted:#6b6a66;--border:rgba(0,0,0,.10);--border-s:rgba(0,0,0,.22);
+  --bg:#fff;--surf:#f7f6f3;--r:8px;--rl:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0ede8;min-height:100vh;display:flex;justify-content:center;padding:2rem 1rem 4rem}
+.page{width:100%;max-width:740px}
+
+/* header */
+.hdr{text-align:center;margin-bottom:1.25rem;padding:1.75rem 1.5rem 1.5rem;background:var(--bg);border-radius:var(--rl);border:.5px solid var(--border)}
+.hdr-eye{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+.hdr h1{font-size:24px;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:8px}
+.hdr p{font-size:14px;color:var(--muted);line-height:1.6}
+.badge{display:inline-block;margin-top:12px;background:var(--amber-lt);color:var(--amber);border:.5px solid #FAC775;border-radius:99px;font-size:12px;font-weight:600;padding:4px 14px}
+
+/* card */
+.card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin-bottom:1.25rem}
+
+/* screens */
+.screen{display:none}.screen.active{display:block}
+
+/* sign-in */
+.si-wrap{text-align:center;padding:.5rem 0}
+.si-wrap h2{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
+.si-wrap p{font-size:14px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+
+
+/* ms button */
+.btn-ms{display:inline-flex;align-items:center;gap:10px;background:#0078d4;color:#fff;border:none;padding:12px 28px;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px}
+.btn-ms:hover{background:#005fa3}
+.ms-logo{width:20px;height:20px;flex-shrink:0}
+
+/* fields */
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.prefilled{font-size:14px;color:var(--text);font-weight:600;padding:8px 0}
+.err{font-size:12px;color:var(--red);margin-top:4px;display:none}
+
+/* buttons */
+.btn-p{background:var(--green);color:#fff;border:none;padding:11px 28px;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer}
+.btn-p:hover{background:var(--green-dk)}
+.btn-p:disabled{opacity:.4;cursor:not-allowed}
+.btn-o{background:transparent;border:.5px solid var(--border-s);padding:10px 22px;border-radius:var(--r);font-size:14px;cursor:pointer;color:var(--text)}
+.btn-o:hover{background:var(--surf)}
+.btn-dl{background:var(--surf);border:.5px solid var(--border-s);padding:9px 18px;border-radius:var(--r);font-size:13px;cursor:pointer;color:var(--text);font-weight:500}
+.btn-dl:hover{background:#e8e5e0}
+.btn-danger{background:transparent;border:.5px solid #F09595;color:var(--red);padding:9px 18px;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:500}
+.btn-danger:hover{background:var(--red-lt)}
+
+/* section label */
+.slabel{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:1.25rem 0 .6rem}
+
+/* child grid */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:8px;margin-bottom:.5rem}
+.ccard{border:.5px solid var(--border);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:border-color .12s,background .12s;background:var(--bg);position:relative;user-select:none}
+.ccard:hover:not(.taken):not(.mine){border-color:var(--green)}
+.ccard.sel{border:1.5px solid var(--green);background:var(--green-lt)}
+.ccard.taken{opacity:.4;cursor:not-allowed;background:var(--surf)}
+
+/* "mine" = already sponsored by you in SharePoint — locked but clearly yours */
+.ccard.mine{border:1.5px solid var(--blue);background:var(--blue-lt);cursor:default}
+.ccard.mine .ccheck{background:var(--blue)}
+
+.ccheck{position:absolute;top:8px;right:8px;width:18px;height:18px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.cname{font-size:13px;font-weight:700;color:var(--text)}
+.cmeta{font-size:12px;color:var(--muted);margin-top:2px}
+.taken-lbl{display:inline-block;font-size:10px;font-weight:700;color:var(--green-dk);background:var(--green-lt);padding:2px 7px;border-radius:99px;margin-top:4px}
+.mine-lbl{display:inline-block;font-size:10px;font-weight:700;color:var(--blue-dk);background:var(--blue-lt);padding:2px 7px;border-radius:99px;margin-top:4px;border:.5px solid rgba(26,86,160,.2)}
+
+/* summary bar */
+.sbar{background:var(--surf);border:.5px solid var(--border);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:1.25rem;gap:12px;flex-wrap:wrap}
+.scnt{font-size:14px;color:var(--muted)}.scnt strong{color:var(--text)}
+
+/* success */
+.sico{width:60px;height:60px;background:var(--green-lt);border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;font-size:26px}
+.scard{text-align:center}
+.scard h2{font-size:22px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.tymsg{background:var(--green-lt);border-left:3px solid var(--green);border-radius:0 var(--r) var(--r) 0;padding:1rem 1.25rem;text-align:left;margin:1.25rem 0}
+.tymsg p{font-size:14px;color:var(--green-dk);line-height:1.75;margin-bottom:8px}
+.tymsg .verse{font-size:13px;font-style:italic;color:var(--green-dk);border-top:.5px solid rgba(29,158,117,.25);padding-top:8px;margin-bottom:0}
+.ctable{width:100%;border-collapse:collapse;margin-top:.75rem;text-align:left;font-size:13px}
+.ctable th{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:.5px solid var(--border-s)}
+.ctable td{padding:8px 8px;border-bottom:.5px solid var(--border);color:var(--text);vertical-align:top}
+.ctable tr:last-child td{border-bottom:none}
+.new-row td{background:#f0faf6}
+
+
+/* print button */
+.btn-print{background:var(--red);color:#fff;border:none;padding:10px 20px;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer}
+.btn-print:hover{background:#9b2d20}
+
+/* print / save as PDF */
+@media print{
+  body{background:#fff}
+  .badge,.screen:not(#s-success),.adm-hdr button,.btn-o,.btn-print,[id="adm"]{display:none!important}
+  .card{box-shadow:none;border:none;padding:0}
+  .page{max-width:100%;padding:0}
+  header{display:none}
+  #s-success .card:last-child{display:none}
+  .sico{display:none}
+}
+
+/* email status */
+.estat{font-size:13px;padding:10px 14px;border-radius:var(--r);margin-top:1rem;display:none;line-height:1.6}
+.estat.sending{background:#EAF3DE;color:#3B6D11;display:block}
+.estat.sent{background:var(--green-lt);color:var(--green-dk);display:block}
+.estat.failed{background:var(--red-lt);color:var(--red);display:block}
+
+/* returning user notice */
+.returning-notice{background:var(--blue-lt);border:.5px solid rgba(26,86,160,.25);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--blue-dk);margin-bottom:1rem;line-height:1.6}
+.conflict-notice{background:var(--amber-lt);border:.5px solid #FAC775;border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--amber);margin-bottom:1rem;line-height:1.6;text-align:left}
+.conflict-notice strong{display:block;margin-bottom:4px;font-size:14px}
+
+/* admin */
+.adm-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.adm-hdr h3{font-size:16px;font-weight:700;color:var(--text)}
+.atable{width:100%;border-collapse:collapse;font-size:13px}
+.atable th{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:7px 0;border-bottom:.5px solid var(--border-s);text-align:left}
+.atable td{padding:9px 0;border-bottom:.5px solid var(--border);color:var(--text);vertical-align:top}
+.atable td:first-child{font-weight:600;min-width:150px;padding-right:12px}
+.pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;margin:2px 2px 2px 0;background:var(--green-lt);color:var(--green-dk);font-weight:600}
+.empty{font-size:13px;color:var(--muted);padding:.75rem 0}
+
+/* loading state */
+.loading-grid{font-size:13px;color:var(--muted);padding:.75rem 0;font-style:italic}
+
+
+@media(max-width:480px){body{padding:1rem .75rem 3rem}.cgrid{grid-template-columns:1fr 1fr}.hdr h1{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- header -->
+<div class="hdr">
+  <div class="hdr-eye">Redheads Engineering</div>
+  <h1>Winter SED – Donation Box Sponsorship</h1>
+  <p>Select the children you'd like to sponsor a donation box for.<br>Once a child is chosen they are removed from the available list.</p>
+  <span class="badge">📦 Boxes due Thursday, 16 July 2026</span>
+</div>
+
+<!-- SCREEN 1: entry -->
+<div id="s-entry" class="screen active">
+  <div class="card">
+    <div class="si-wrap" id="ms-section">
+      <h2>Sign in with your Redheads account</h2>
+      <p>Click below to sign in with your Microsoft 365 account — the form will fill your name and email automatically.</p>
+      <button class="btn-ms" onclick="msSignIn()">
+        <svg class="ms-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21">
+          <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+          <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+          <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+          <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+        </svg>
+        Sign in with Microsoft
+      </button>
+      <p id="ms-status" style="font-size:13px;color:var(--muted);margin-bottom:16px;min-height:18px"></p>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: confirm identity -->
+<div id="s-confirm" class="screen">
+  <div class="card">
+    <div class="field"><label>Your name</label><div class="prefilled" id="show-name"></div></div>
+    <div class="field"><label>Confirmation will be sent to</label><div class="prefilled" id="show-email"></div></div>
+    <div id="confirm-returning" style="display:none" class="returning-notice"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-o" onclick="showScreen('s-entry')">Back</button>
+      <button class="btn-p" onclick="goSelect()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: select children -->
+<div id="s-select" class="screen">
+  <div class="card">
+    <p id="sel-msg" style="font-size:14px;color:var(--muted);margin-bottom:1rem"></p>
+    <div id="returning-banner" style="display:none" class="returning-notice" id="returning-banner"></div>
+    <div class="slabel">House 1</div><div class="cgrid" id="g-h1"></div>
+    <div class="slabel">House 2</div><div class="cgrid" id="g-h2"></div>
+    <div class="slabel">House 3</div><div class="cgrid" id="g-h3"></div>
+    <div class="sbar">
+      <span class="scnt">New selections: <strong id="sel-n">0</strong></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-o" onclick="showScreen('s-confirm')">Back</button>
+        <button class="btn-p" id="btn-ok" onclick="confirm_sel()" disabled>Confirm selection</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: success -->
+<div id="s-success" class="screen">
+  <div class="card scard">
+    <div class="sico">❤️</div>
+    <h2>Thank you, <span id="ok-name"></span>!</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:4px">
+      You are sponsoring <strong id="ok-total"></strong> child<span id="ok-pl"></span> in total
+      <span id="ok-new-note" style="display:none"> (<span id="ok-new-cnt"></span> newly added today)</span>.
+    </p>
+
+    <div class="tymsg">
+      <p>Thank you for your participation in the <strong>Winter SED Programme</strong>. It is always wonderful to see Redheads staff open their hearts so generously — your kindness makes a real difference in these children's lives.</p>
+      <p>Please have your donation boxes ready by <strong>Thursday, 16 July 2026</strong>.</p>
+      <p class="verse">2 Corinthians 9:7–8 — <em>"Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver. And God is able to bless you abundantly, so that in all things at all times, having all that you need, you will abound in every good work."</em></p>
+    </div>
+
+    <div style="text-align:left">
+      <p style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Your sponsored children</p>
+      <table class="ctable"><thead><tr>
+        <th>Name</th><th>House</th><th>Age</th><th>Grade</th><th>Gender</th><th>Birthday</th><th>Shoe</th><th>Clothing</th>
+      </tr></thead><tbody id="ok-tbody"></tbody></table>
+    </div>
+
+    <div id="conflict-banner" class="conflict-notice" style="display:none"></div>
+    <div id="estat" class="estat"></div>
+    <div style="margin-top:1.5rem;display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="btn-print" onclick="window.print()">🖨 Print / Save as PDF</button><button class="btn-o" onclick="restart()">Submit another response</button></div>
+  </div>
+
+  <div class="card">
+    <div class="adm-hdr">
+      <h3>All sponsorships</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-dl" onclick="dlCSV()">↓ Download CSV</button>
+        <button class="btn-danger" onclick="resetAll()">✕ Reset all</button>
+      </div>
+    </div>
+    <div id="adm"></div>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+/* ── CONFIG ── replace all placeholders before uploading to SharePoint ── */
+const CLIENT_ID     = '22df9f5b-a305-4f8e-9b65-d110d9c2d2c8';
+const TENANT_ID     = 'a866e306-bd39-48f7-9b8a-5ac7d9be4a49';
+const FLOW_URL      = 'https://defaulta866e306bd3948f79b8a5ac7d9be4a.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2fb7d37180914beab749bf784d37b740/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UEOCAkAcfwNEbD3IcKqhqJB2rGjHMXAnOIuI6SAHmNQ';   // HTTP POST URL from Power Automate
+const SP_SITE_URL   = 'https://redheads.sharepoint.com/sites/HR';
+const SP_LIST_NAME  = 'WinterSED Children';   // single SharePoint list — child data + sponsorship claims
+const IS_DEMO       = (CLIENT_ID === 'YOUR_CLIENT_ID');
+
+/* ── DEMO FALLBACK DATA ──
+   Used when IS_DEMO=true or when SharePoint is unreachable.
+   HR can manage the live data in the SharePoint list — this is only a fallback.
+*/
+const CH_DEMO = {
+  h1:[
+    {id:'h1_01',name:'Carol Nortje',        house:'House 1',g:'Female',dob:'2017/04/21',age:8, gr:'Gr. 3', shoe:'12 (Kiddies)', cl:'8–9 yrs'},
+    {id:'h1_02',name:'Hayleigh van Staden',  house:'House 1',g:'Female',dob:'2016/01/17',age:10,gr:'Gr. 4', shoe:'1 (Adult)',    cl:'9–10 yrs'},
+    {id:'h1_03',name:'Dameon Dixon',         house:'House 1',g:'Male',  dob:'2016/02/16',age:10,gr:'Gr. 4', shoe:'13 (Kiddies)',cl:'9–10 yrs'},
+    {id:'h1_04',name:'Estian Grobler',       house:'House 1',g:'Male',  dob:'2016/05/09',age:10,gr:'Gr. 3', shoe:'3 (Adult)',   cl:'10–11 yrs'},
+    {id:'h1_05',name:'Hendré Swanepoel',     house:'House 1',g:'Male',  dob:'2015/05/21',age:9, gr:'Gr. 4', shoe:'2 (Adult)',   cl:'8–9 yrs'},
+    {id:'h1_06',name:'Jessica Nortje',       house:'House 1',g:'Female',dob:'2015/05/28',age:10,gr:'Gr. 3', shoe:'2 (Adult)',   cl:'10–11 yrs'},
+    {id:'h1_07',name:'Anushka Nortje',       house:'House 1',g:'Female',dob:'2020/03/30',age:6, gr:'Gr. R', shoe:'10 (Kiddies)',cl:'5–6 yrs'},
+    {id:'h1_08',name:'Annemieke Swanepoel',  house:'House 1',g:'Female',dob:'2014/01/13',age:12,gr:'Gr. 6', shoe:'4 (Adult)',   cl:'13–14 yrs'},
+    {id:'h1_09',name:'Favour Moyo',          house:'House 1',g:'Female',dob:'2014/01/25',age:12,gr:'Gr. 5', shoe:'3 (Adult)',   cl:'10–11 yrs'},
+    {id:'h1_10',name:'Grace Nortje',         house:'House 1',g:'Female',dob:'2013/12/13',age:12,gr:'Gr. 5', shoe:'3 (Adult)',   cl:'11–12 yrs'},
+    {id:'h1_11',name:'Sarah Masinga',        house:'House 1',g:'Female',dob:'2014/10/01',age:11,gr:'Gr. 5', shoe:'5/6 (Adult)', cl:'9–10 yrs'},
+    {id:'h1_12',name:'Letabo Mothoabi',      house:'House 1',g:'Male',  dob:'2018/05/18',age:6, gr:'Gr. 1', shoe:'11 (Kiddies)',cl:'5–6 yrs'},
+    {id:'h1_13',name:'Dunnay Jacobs',        house:'House 1',g:'Female',dob:'2015/12/19',age:10,gr:'Gr. 5', shoe:'1 (Adult)',   cl:'10–11 yrs'},
+    {id:'h1_14',name:'Mikyle Johnson',       house:'House 1',g:'Male',  dob:'2017/01/05',age:9, gr:'Gr. 3', shoe:'3 (Adult)',   cl:'10–11 yrs'},
+    {id:'h1_15',name:'Zandre Stapelberg',    house:'House 1',g:'Male',  dob:'2020/02/19',age:6, gr:'Gr. R', shoe:'14 (Kiddies)',cl:'6–7 yrs'},
+    {id:'h1_16',name:'Chloe Mamve',          house:'House 1',g:'Female',dob:'2016/03/29',age:9, gr:'Gr. 3', shoe:'13 (Kiddies)',cl:'9–10 yrs'},
+    {id:'h1_17',name:'Isabel Vd Merwe',      house:'House 1',g:'Female',dob:'2013/09/12',age:12,gr:'Gr. 7', shoe:'4 (Adult)',   cl:'11–12 yrs'},
+    {id:'h1_18',name:'Kayla Brits',          house:'House 1',g:'Female',dob:'2015/06/10',age:10,gr:'Gr. 4', shoe:'1 (Adult)',   cl:'10–11 yrs'},
+  ],
+  h2:[
+    {id:'h2_01',name:'Toni Hayward',         house:'House 2',g:'Male',dob:'2011/05/05',age:14,gr:'Gr. 7',  shoe:'6 (Adult)',  cl:'12–13 yrs (M)'},
+    {id:'h2_02',name:'Jean-Claude Viljoen',  house:'House 2',g:'Male',dob:'2010/08/10',age:15,gr:'Gr. 10', shoe:'10 (Adult)', cl:'14–15 yrs (M)'},
+    {id:'h2_03',name:'Jayden Nortje',        house:'House 2',g:'Male',dob:'2010/12/25',age:15,gr:'Gr. 7',  shoe:'7 (Adult)',  cl:'14–15 yrs (M)'},
+    {id:'h2_04',name:'Tyrelle Chetty',       house:'House 2',g:'Male',dob:'2009/02/04',age:17,gr:'Gr. 11', shoe:'7 (Adult)',  cl:'M'},
+    {id:'h2_05',name:'Danrico Theys',        house:'House 2',g:'Male',dob:'2009/12/03',age:16,gr:'Gr. 9',  shoe:'6 (Adult)',  cl:'13–14 yrs (M)'},
+    {id:'h2_06',name:'Lennard Lensley',      house:'House 2',g:'Male',dob:'2008/05/13',age:17,gr:'Gr. 12', shoe:'10 (Adult)', cl:'30/32'},
+    {id:'h2_07',name:'Caribeni Chauke',      house:'House 2',g:'Male',dob:'2006/09/16',age:18,gr:'Gr. 12', shoe:'11 (Adult)', cl:'Large'},
+    {id:'h2_08',name:'Danie Engelbrecht',    house:'House 2',g:'Male',dob:'2012/05/09',age:13,gr:'Gr. 5',  shoe:'6 (Adult)',  cl:'11–12 yrs (S)'},
+    {id:'h2_09',name:'Pieter De Beer',       house:'House 2',g:'Male',dob:'2008/07/03',age:17,gr:'Gr. 12', shoe:'10 (Adult)', cl:'30/32 (M)'},
+    {id:'h2_10',name:'Lohan Greef',          house:'House 2',g:'Male',dob:'2011/04/30',age:14,gr:'Gr. 8',  shoe:'7 (Adult)',  cl:'13–14 yrs (S-M)'},
+    {id:'h2_11',name:'Brian Wyllie',         house:'House 2',g:'Male',dob:'2009/04/10',age:16,gr:'Gr. 11', shoe:'9 (Adult)',  cl:'32/34 (M-L)'},
+    {id:'h2_12',name:'Kayden Hennop',        house:'House 2',g:'Male',dob:'2012/04/28',age:14,gr:'Gr. 7',  shoe:'8 (Adult)',  cl:'15 yrs top small'},
+    {id:'h2_13',name:'Frans Majola',         house:'House 2',g:'Male',dob:'2008/12/02',age:17,gr:'Gr. 10', shoe:'7 (Adult)',  cl:'Medium'},
+    {id:'h2_14',name:'Tebogo Majola',        house:'House 2',g:'Male',dob:'2009/03/09',age:16,gr:'Gr. 8',  shoe:'7 (Adult)',  cl:'Medium'},
+    {id:'h2_15',name:'Refaldo Santos',       house:'House 2',g:'Male',dob:'2007/03/24',age:18,gr:'Gr. 10', shoe:'10 (Adult)', cl:'Large'},
+    {id:'h2_16',name:'Dorreyn Jacobs',       house:'House 2',g:'Male',dob:'2013/11/27',age:12,gr:'Gr. 6',  shoe:'4 (Adult)',  cl:'11–12 yrs'},
+  ],
+  h3:[
+    {id:'h3_01',name:'Anel Frey',         house:'House 3',g:'Female',dob:'2010/02/02',age:16,gr:'Gr. 10',shoe:'7 (Adult)',  cl:'M'},
+    {id:'h3_02',name:'Theo Mahayea',      house:'House 3',g:'Female',dob:'2010/03/04',age:15,gr:'Gr. 10',shoe:'4 (Adult)',  cl:'S'},
+    {id:'h3_03',name:'Roxanne Theron',    house:'House 3',g:'Female',dob:'2009/02/03',age:17,gr:'Gr. 11',shoe:'8 (Adult)',  cl:'L'},
+    {id:'h3_04',name:'Bhiya Chauke',      house:'House 3',g:'Female',dob:'2009/09/16',age:16,gr:'Gr. 11',shoe:'6 (Adult)',  cl:'S'},
+    {id:'h3_05',name:'Brittany Britnell', house:'House 3',g:'Female',dob:'2009/08/25',age:16,gr:'Gr. 10',shoe:'7 (Adult)',  cl:'M'},
+    {id:'h3_06',name:'Jessie-Lara Geluk', house:'House 3',g:'Female',dob:'2009/04/20',age:16,gr:'Gr. 10',shoe:'5 (Adult)',  cl:'XS'},
+    {id:'h3_07',name:'Arishna Chetty',    house:'House 3',g:'Female',dob:'2012/04/21',age:13,gr:'Gr. 9', shoe:'4 (Adult)',  cl:'S'},
+    {id:'h3_08',name:'Ashley Swanepoel',  house:'House 3',g:'Female',dob:'2012/04/20',age:13,gr:'Gr. 8', shoe:'5 (Adult)',  cl:'13–14 yrs'},
+    {id:'h3_09',name:'Martha Msomi',      house:'House 3',g:'Female',dob:'2012/08/28',age:13,gr:'Gr. 6', shoe:'4 (Adult)',  cl:'M'},
+    {id:'h3_10',name:'Stacy van Staden',  house:'House 3',g:'Female',dob:'2012/02/19',age:13,gr:'Gr. 7', shoe:'4/5 (Adult)',cl:'13–14 yrs'},
+  ]
+};
+
+/* ── RUNTIME DATA — populated from SharePoint on load ──
+   HR can add/edit children directly in the SharePoint list.
+   Changes are reflected here automatically on next page load.
+*/
+let CH  = {h1:[], h2:[], h3:[]};
+let ALL = [];
+
+/* house(id) — looks up the house from the loaded child data;
+   falls back to ID prefix for backward compatibility */
+function house(id){
+  const c = ALL.find(x => x.id === id);
+  return c ? c.house : (id.startsWith('h1') ? 'House 1' : id.startsWith('h2') ? 'House 2' : 'House 3');
+}
+
+/* ── STATE ──
+   claimed    : { childId → employeeEmail }  — all sponsored children from SharePoint
+   myChildren : Set<childId>                 — children already in SharePoint for current user
+   sel        : Set<childId>                 — newly selected this session (not yet submitted)
+*/
+let emp='', email='', sel=new Set(), myChildren=new Set(), subs=[], claimed={};
+let msalApp=null, msAccount=null, msToken=null;
+let _loadPromise = null;   // single in-flight load promise
+
+/* ── INIT ── */
+window.onload = function(){
+  if(IS_DEMO){
+    document.getElementById('ms-section').style.display='none';
+  } else {
+    // Load MSAL for MS sign-in
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js';
+    s.onload=initMSAL;
+    document.head.appendChild(s);
+  }
+  // Load children (and claimed status) from SharePoint in the background.
+  // By the time the user reaches the selection screen, data will be ready.
+  _loadPromise = loadChildren();
+};
+
+function initMSAL(){
+  msalApp = new msal.PublicClientApplication({
+    auth:{ clientId:CLIENT_ID, authority:'https://login.microsoftonline.com/'+TENANT_ID, redirectUri:location.href.split('?')[0] },
+    cache:{ cacheLocation:'sessionStorage' }
+  });
+}
+
+/* ── LOAD CHILDREN FROM SHAREPOINT ──
+   Single API call that loads all child data AND claims in one request.
+   Populates CH, ALL, and claimed{} together so they are always in sync.
+   HR can add, remove, or edit children in the SharePoint list at any time;
+   the form reflects changes automatically on the next page load.
+   Falls back to CH_DEMO if SharePoint is unreachable.
+*/
+async function loadChildren(){
+  if(IS_DEMO){
+    CH  = {h1:[...CH_DEMO.h1], h2:[...CH_DEMO.h2], h3:[...CH_DEMO.h3]};
+    ALL = [...CH.h1, ...CH.h2, ...CH.h3];
+    return;
+  }
+  try{
+    const url = `${SP_SITE_URL}/_api/web/lists/getbytitle('${encodeURIComponent(SP_LIST_NAME)}')/items` +
+      `?$select=ChildID,Title,House,Age,Grade,Gender,Birthday,ShoeSize,ClothingSize,EmployeeEmail` +
+      `&$orderby=House,ChildID&$top=5000`;
+    const res = await fetch(url, {
+      headers:{'Accept':'application/json;odata=verbose'},
+      credentials:'include'
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    const items = data.d?.results || [];
+
+    CH      = {h1:[], h2:[], h3:[]};
+    claimed = {};
+
+    items.forEach(item => {
+      if(!item.ChildID) return;
+
+      // Convert SharePoint ISO date → yyyy/mm/dd
+      let dob = '';
+      if(item.Birthday){
+        const d = new Date(item.Birthday);
+        dob = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+      }
+
+      const child = {
+        id:    item.ChildID,
+        name:  item.Title   || '',
+        house: item.House   || 'House 1',
+        g:     item.Gender  || '',
+        dob,
+        age:   item.Age     || 0,
+        gr:    item.Grade   || '',
+        shoe:  item.ShoeSize     || '',
+        cl:    item.ClothingSize || ''
+      };
+
+      // Group by House column — supports any naming HR uses
+      const h = (item.House || '').toLowerCase().replace(/\s+/g,'');
+      if      (h==='house1'||h==='1') CH.h1.push(child);
+      else if (h==='house2'||h==='2') CH.h2.push(child);
+      else if (h==='house3'||h==='3') CH.h3.push(child);
+      else                             CH.h1.push(child); // fallback
+
+      // Track claimed status
+      if(item.EmployeeEmail) claimed[item.ChildID] = item.EmployeeEmail.toLowerCase();
+    });
+
+    ALL = [...CH.h1, ...CH.h2, ...CH.h3];
+
+  } catch(e){
+    console.warn('SharePoint load failed — using local fallback data:', e);
+    CH  = {h1:[...CH_DEMO.h1], h2:[...CH_DEMO.h2], h3:[...CH_DEMO.h3]};
+    ALL = [...CH.h1, ...CH.h2, ...CH.h3];
+  }
+}
+
+/* ── CHECK AVAILABILITY ──
+   Queries SharePoint at submit time for the live EmployeeEmail value of each
+   selected child. Returns { available: [childId, ...], taken: [childId, ...] }.
+   "taken" means another user claimed the child between page load and submit.
+*/
+async function checkAvailability(childIds){
+  const available = [];
+  const taken     = [];
+  if(!childIds || childIds.length === 0) return { available, taken };
+
+  try {
+    // Build OData filter: ChildID eq 'H1-001' or ChildID eq 'H1-002' ...
+    const filter = childIds.map(id => `ChildID eq '${id}'`).join(' or ');
+    const url = `${SP_SITE_URL}/_api/web/lists/getbytitle('${encodeURIComponent(SP_LIST_NAME)}')/items` +
+      `?$select=ChildID,EmployeeEmail&$filter=${encodeURIComponent(filter)}&$top=200`;
+
+    const res = await fetch(url, {
+      headers: { 'Accept': 'application/json;odata=verbose' },
+      credentials: 'include'
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+
+    const data  = await res.json();
+    const items = data.d?.results || [];
+
+    // Build a map of childId → current sponsor email
+    const liveState = {};
+    items.forEach(item => {
+      if(item.ChildID) liveState[item.ChildID] = (item.EmployeeEmail || '').toLowerCase().trim();
+    });
+
+    childIds.forEach(id => {
+      const sponsor = liveState[id] || '';
+      // Available if: no sponsor, OR the sponsor is the current user (re-confirming their own)
+      if(!sponsor || sponsor === email.toLowerCase()){
+        available.push(id);
+      } else {
+        taken.push(id);
+      }
+    });
+
+  } catch(e) {
+    console.warn('checkAvailability failed — proceeding optimistically:', e);
+    // If the check itself fails, allow all through so the user isn't blocked
+    childIds.forEach(id => available.push(id));
+  }
+
+  return { available, taken };
+}
+
+/* ── MICROSOFT SIGN-IN ── */
+async function msSignIn(){
+  if(IS_DEMO) return;
+  if(!msalApp){ document.getElementById('ms-status').textContent='Loading… please try again in a moment.'; return; }
+  document.getElementById('ms-status').textContent='Opening Microsoft sign-in…';
+  try{
+    const r = await msalApp.loginPopup({scopes:['User.Read','Mail.Send']});
+    msAccount=r.account; msToken=r.accessToken;
+    const me = await fetch('https://graph.microsoft.com/v1.0/me?$select=displayName,mail,userPrincipalName',
+      {headers:{Authorization:'Bearer '+msToken}}).then(x=>x.json());
+    emp   = me.displayName || r.account.name;
+    email = (me.mail || me.userPrincipalName).toLowerCase();
+    // Ensure children are loaded before checking returning-user status
+    if(!ALL.length) await (_loadPromise || loadChildren());
+    identifyReturningUser();
+    setConfirmScreen();
+    showScreen('s-confirm');
+  } catch(e){
+    document.getElementById('ms-status').textContent='Sign-in failed: '+(e.message||e);
+  }
+}
+
+/* ── IDENTIFY RETURNING USER ──
+   Checks claimed{} for any children already linked to this user's email.
+   Populates myChildren so the grid can distinguish "mine" from "taken by others".
+*/
+function identifyReturningUser(){
+  myChildren = new Set(Object.keys(claimed).filter(id => claimed[id] === email));
+}
+
+function setConfirmScreen(){
+  document.getElementById('show-name').textContent  = emp;
+  document.getElementById('show-email').textContent = email;
+  const notice = document.getElementById('confirm-returning');
+  if(myChildren.size > 0){
+    notice.style.display='block';
+    notice.textContent = `You are already sponsoring ${myChildren.size} child${myChildren.size===1?'':'ren'}. You can add more on the next screen.`;
+  } else {
+    notice.style.display='none';
+  }
+}
+
+async function goSelect(){
+  sel=new Set();
+  // Wait for children to finish loading if still in-flight
+  if(!ALL.length){
+    document.getElementById('sel-msg').textContent='Loading children from SharePoint…';
+    showScreen('s-select');
+    await (_loadPromise || loadChildren());
+  }
+  const first=emp.split(' ')[0];
+  if(myChildren.size > 0){
+    document.getElementById('sel-msg').textContent=`Hi ${first}! Select additional children to sponsor below. Children you already sponsor are shown in blue.`;
+    const banner=document.getElementById('returning-banner');
+    banner.style.display='block';
+    banner.textContent=`Already sponsoring: ${myChildren.size} child${myChildren.size===1?'':'ren'}. Blue cards are yours — locked in. Select new ones in green.`;
+  } else {
+    document.getElementById('sel-msg').textContent=`Hi ${first}! Select the children you would like to sponsor. Greyed-out cards are already taken.`;
+    document.getElementById('returning-banner').style.display='none';
+  }
+  renderGrids();
+  showScreen('s-select');
+}
+
+/* ── GRIDS ── */
+function renderGrids(){
+  [['h1','g-h1'],['h2','g-h2'],['h3','g-h3']].forEach(([k,gid])=>{
+    const g=document.getElementById(gid);
+    g.innerHTML='';
+    if(!CH[k].length){
+      g.innerHTML='<p class="loading-grid">No children in this house.</p>';
+      return;
+    }
+    CH[k].forEach(c=>{
+      const ismine  = myChildren.has(c.id);
+      const taken   = !ismine && !!claimed[c.id];   // taken by someone else
+      const chosen  = sel.has(c.id);
+      const d=document.createElement('div');
+      d.className='ccard'+(ismine?' mine':chosen?' sel':taken?' taken':'');
+      d.id='c-'+c.id;
+      d.innerHTML=
+        (ismine||chosen ? '<div class="ccheck">✓</div>' : '') +
+        '<div class="cname">'+c.name+'</div>'+
+        '<div class="cmeta">Age '+c.age+' · '+c.gr+'</div>'+
+        (ismine  ? '<span class="mine-lbl">Yours</span>' :
+         taken   ? '<span class="taken-lbl">Sponsored</span>' : '');
+      if(!taken && !ismine) d.onclick=()=>toggle(c.id);
+      g.appendChild(d);
+    });
+  });
+  updCount();
+}
+
+function toggle(id){
+  if(claimed[id] || myChildren.has(id)) return;   // locked — taken or already mine
+  sel.has(id) ? sel.delete(id) : sel.add(id);
+  const c=ALL.find(x=>x.id===id);
+  const d=document.getElementById('c-'+id);
+  const on=sel.has(id);
+  d.className='ccard'+(on?' sel':'');
+  d.innerHTML=(on?'<div class="ccheck">✓</div>':'')+
+    '<div class="cname">'+c.name+'</div>'+
+    '<div class="cmeta">Age '+c.age+' · '+c.gr+'</div>';
+  updCount();
+}
+
+function updCount(){
+  document.getElementById('sel-n').textContent=sel.size;
+  document.getElementById('btn-ok').disabled=sel.size===0;
+}
+
+/* ── CONFIRM SELECTION ── */
+async function confirm_sel(){
+  if(!sel.size) return;
+
+  // Disable button and show checking state
+  const btn = document.getElementById('btn-ok');
+  btn.disabled = true;
+  btn.textContent = 'Checking availability…';
+
+  // ── REAL-TIME AVAILABILITY CHECK ──
+  const { available, taken } = await checkAvailability([...sel]);
+
+  // Re-enable button
+  btn.disabled = false;
+  btn.textContent = 'Confirm selection';
+
+  // Remove any taken children from the active selection
+  taken.forEach(id => sel.delete(id));
+
+  // ── STEP 4: Refresh grid with live state ──
+  // Mark newly-confirmed-taken children in the claimed map so the grid
+  // renders them as greyed-out "Sponsored" immediately.
+  taken.forEach(id => { if(!claimed[id]) claimed[id] = '__taken__'; });
+  renderGrids();
+
+  // If everything the user selected was already taken, show inline message and stop
+  if(available.length === 0){
+    const takenNames = taken.map(id => { const c = ALL.find(x=>x.id===id); return c ? c.name : id; });
+    const banner = document.getElementById('conflict-banner');
+    banner.innerHTML = '<strong>⚠ No children were claimed</strong>' +
+      'Sorry — the following child' + (takenNames.length===1?' was':'ren were') +
+      ' claimed by someone else just before you submitted: ' +
+      '<em>' + takenNames.join(', ') + '</em>. Please select different children and try again.';
+    banner.style.display = 'block';
+    showScreen('s-success');
+    return;
+  }
+
+  // Store taken names for partial conflict banner (shown on success screen)
+  window._lastConflict = taken;
+
+  const newKids    = available.map(id=>ALL.find(c=>c.id===id)).filter(Boolean);
+  const existKids  = [...myChildren].map(id=>ALL.find(c=>c.id===id)).filter(Boolean);
+  const allMyKids  = [...existKids, ...newKids];
+
+  // Update in-memory index
+  newKids.forEach(k=>{ claimed[k.id]=email; myChildren.add(k.id); });
+
+  // Update admin subs list
+  const ex=subs.findIndex(s=>s.email===email);
+  if(ex>=0){ subs[ex].kids.push(...newKids.filter(k=>!subs[ex].kids.find(x=>x.id===k.id))); }
+  else subs.push({emp, email, kids:allMyKids});
+
+  // Build success screen
+  document.getElementById('ok-name').textContent=emp.split(' ')[0];
+  document.getElementById('ok-total').textContent=allMyKids.length;
+  document.getElementById('ok-pl').textContent=allMyKids.length===1?'':'ren';
+  if(existKids.length>0){
+    document.getElementById('ok-new-note').style.display='inline';
+    document.getElementById('ok-new-cnt').textContent=newKids.length;
+  }
+  document.getElementById('ok-tbody').innerHTML=allMyKids.map((c,i)=>{
+    const isNew=i>=existKids.length;
+    return `<tr class="${isNew?'new-row':''}"><td><strong>${c.name}</strong>${isNew?' <span style="font-size:10px;color:var(--green-dk);font-weight:700">NEW</span>':''}</td><td>${house(c.id)}</td><td>${c.age}</td><td>${c.gr}</td><td>${c.g}</td><td>${c.dob}</td><td>${c.shoe}</td><td>${c.cl}</td></tr>`;
+  }).join('');
+
+  // Show partial conflict notice if some children were already taken
+  const conflictBanner = document.getElementById('conflict-banner');
+  if(window._lastConflict && window._lastConflict.length > 0){
+    const takenNames = window._lastConflict.map(id => { const c = ALL.find(x=>x.id===id); return c ? c.name : id; });
+    conflictBanner.innerHTML = '<strong>⚠ Some children were already taken</strong>' +
+      (takenNames.length===1 ? ' One child you selected was' : ' Some children you selected were') +
+      ' claimed by a colleague just before you submitted: <em>' + takenNames.join(', ') +
+      '</em>. Your other selections went through successfully.';
+    conflictBanner.style.display = 'block';
+  } else {
+    conflictBanner.style.display = 'none';
+  }
+  window._lastConflict = [];
+  renderAdm();
+  showScreen('s-success');
+
+  // Post only NEW children to Power Automate (one request per child)
+  newKids.forEach(c=>postToFlow(emp, email, c));
+  sendEmail(emp, email, allMyKids, newKids.length);
+}
+
+/* ── POST TO POWER AUTOMATE ──
+   Sends one HTTP POST per new child to the webhook.
+   The flow writes one row per child to the SharePoint list (the index).
+   ChildID is the key field — the flow should check for duplicates before writing.
+*/
+async function postToFlow(empName, empEmail, child){
+  if(IS_DEMO || FLOW_URL === 'YOUR_POWER_AUTOMATE_WEBHOOK_URL') return;
+  try{
+    await fetch(FLOW_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        employeeName:  empName,
+        employeeEmail: empEmail,
+        childID:       child.id,
+        childName:     child.name,
+        house:         child.house,
+        age:           child.age,
+        grade:         child.gr,
+        gender:        child.g,
+        birthday:      child.dob,
+        shoeSize:      child.shoe,
+        clothingSize:  child.cl
+      })
+    });
+  } catch(e){
+    console.error('Flow post failed for', child.name, e);
+  }
+}
+
+/* ── EMAIL ── */
+async function sendEmail(name, emailAddr, allKids, newCount){
+  const el=document.getElementById('estat');
+  if(IS_DEMO){
+    el.className='estat failed';
+    el.textContent='⚠ Demo mode — no email sent. On SharePoint with Azure configured, a real confirmation email will be sent to '+emailAddr+' via Outlook.';
+    return;
+  }
+  el.className='estat sending';
+  el.textContent='Sending confirmation email via your Outlook…';
+  let token=msToken;
+  try{
+    const r=await msalApp.acquireTokenSilent({scopes:['Mail.Send'],account:msAccount});
+    token=r.accessToken;
+  }catch(e){}
+
+  const existCount = allKids.length - newCount;
+  const rows=allKids.map((c,i)=>{
+    const isNew=i>=existCount;
+    return `<tr style="${isNew?'background:#f0faf6':''}">
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0"><strong>${c.name}</strong>${isNew?' <span style="font-size:10px;color:#0F6E56;font-weight:700">NEW</span>':''}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${house(c.id)}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${c.age}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${c.gr}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${c.g}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${c.dob}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${c.shoe}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #e0e0e0">${c.cl}</td>
+    </tr>`;
+  }).join('');
+
+  const addedNote = newCount > 0 && existCount > 0
+    ? `<p style="font-size:15px;line-height:1.7">You have added <strong>${newCount}</strong> new child${newCount===1?'':'ren'} to your sponsorship, bringing your total to <strong>${allKids.length}</strong>.</p>`
+    : '';
+
+  const html=`<div style="font-family:Segoe UI,Arial,sans-serif;max-width:640px;margin:0 auto">
+<div style="background:#1D9E75;padding:24px 28px;border-radius:8px 8px 0 0">
+  <p style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px">Redheads Engineering</p>
+  <h1 style="color:#fff;font-size:22px;font-weight:700;margin:0">Winter SED – Donation Box Sponsorship</h1>
+</div>
+<div style="background:#fff;padding:24px 28px;border:1px solid #e0e0e0;border-top:none">
+  <p style="font-size:15px;line-height:1.7">Dear <strong>${name}</strong>,</p>
+  <p style="font-size:15px;line-height:1.7">Thank you for your participation in the <strong>Winter SED Programme</strong>. It is always wonderful to see Redheads staff open their hearts so generously — your kindness makes a real difference in these children's lives.</p>
+  ${addedNote}
+  <p style="font-size:15px;line-height:1.7">Please have your donation boxes ready by <strong>Thursday, 16 July 2026</strong>.</p>
+  <div style="background:#E1F5EE;border-left:4px solid #1D9E75;padding:14px 18px;border-radius:0 6px 6px 0;margin:20px 0">
+    <p style="font-size:13px;font-style:italic;color:#0F6E56;line-height:1.75;margin:0">2 Corinthians 9:7–8 — <em>"Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver. And God is able to bless you abundantly, so that in all things at all times, having all that you need, you will abound in every good work."</em></p>
+  </div>
+  <h2 style="font-size:15px;font-weight:700;margin:24px 0 12px">Your sponsored ${allKids.length} child${allKids.length===1?'':'ren'}</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:#E1F5EE">
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Name</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">House</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Age</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Grade</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Gender</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Birthday</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Shoe</th>
+      <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;color:#0F6E56">Clothing</th>
+    </tr></thead><tbody>${rows}</tbody>
+  </table>
+  <p style="font-size:13px;color:#6b6a66;margin-top:24px">With warm regards,<br><strong>Redheads Engineering SED Team</strong></p>
+</div>
+<div style="background:#f7f6f3;padding:14px 28px;border-radius:0 0 8px 8px;border:1px solid #e0e0e0;border-top:none">
+  <p style="font-size:11px;color:#999;margin:0">This email wa
